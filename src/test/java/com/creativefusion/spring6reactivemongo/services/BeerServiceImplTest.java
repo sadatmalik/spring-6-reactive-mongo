@@ -40,6 +40,17 @@ class BeerServiceImplTest {
     public static BeerDTO getTestBeerDto(){
         return new BeerMapperImpl().beerToBeerDto(getTestBeer());
     }
+
+    public static Beer getTestBeer() {
+        return Beer.builder()
+                .beerName("Space Dust")
+                .beerStyle("IPA")
+                .price(BigDecimal.TEN)
+                .quantityOnHand(12)
+                .upc("123213")
+                .build();
+    }
+
     @BeforeEach
     void setUp() {
         beerDTO = beerMapper.beerToBeerDto(getTestBeer());
@@ -74,14 +85,19 @@ class BeerServiceImplTest {
         assertThat(savedDto.getId()).isNotNull();
     }
 
-    public static Beer getTestBeer() {
-        return Beer.builder()
-                .beerName("Space Dust")
-                .beerStyle("IPA")
-                .price(BigDecimal.TEN)
-                .quantityOnHand(12)
-                .upc("123213")
-                .build();
+    @Test
+    void findFirstByBeerNameTest() {
+        BeerDTO beerDto = getSavedBeerDto();
+
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+        Mono<BeerDTO> foundDto = beerService.findFirstByBeerName(beerDto.getBeerName());
+
+        foundDto.subscribe(dto -> {
+            System.out.println(dto.toString());
+            atomicBoolean.set(true);
+        });
+
+        await().untilTrue(atomicBoolean);
     }
 
     @Test
